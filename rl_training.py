@@ -569,22 +569,30 @@ def test_rl_training():
     mdp = DiffusionMDP(max_steps=20)
     reward_function = RewardFunction()
     
+    # Mock experts for testing
+    from expert_samplers import MockSampler
+    experts = {
+        "mock_expert_1": MockSampler(sampler_type="mock_1"),
+        "mock_expert_2": MockSampler(sampler_type="mock_2")
+    }
+    
     trainer = RLTrainer(
         mdp=mdp,
         reward_function=reward_function,
+        experts=experts,
         state_dim=mdp.state_dim,
-        action_dim=mdp.action_dim,
         use_baseline=True
     )
     
     # Kurzes Training für Test
-    results = trainer.train(num_episodes=50, log_interval=10)
+    trainer.train(num_episodes=50, log_interval=10)
     
     # Test Episode
-    episode_data = trainer.run_episode()
+    initial_latent = torch.randn(1, 4, 64, 64)
+    episode_data = trainer.run_episode(initial_latent)
     logger.info(f"Test Episode - Reward: {episode_data['total_reward']:.3f}, "
                f"Quality: {episode_data['final_quality']:.3f}, "
-               f"Steps: {episode_data['total_steps']}")
+               f"Expert: {episode_data['expert_index']}")
     
     # Checkpoint-Test
     trainer.save_checkpoint("test_checkpoint")

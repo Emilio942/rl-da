@@ -15,6 +15,15 @@ class BaseSampler(ABC):
         """The main sampling loop for the expert."""
         pass
 
+class MockSampler(BaseSampler):
+    """A mock sampler for testing purposes."""
+    def __init__(self, sampler_type: str):
+        self.sampler_type = sampler_type
+
+    def sample(self, policy, initial_noise: torch.Tensor):
+        print(f"INFO: Using MockSampler: {self.sampler_type}")
+        return torch.randn_like(initial_noise)
+
 class DefaultAdaptiveSampler(BaseSampler):
     """
     The original adaptive sampling logic, now encapsulated as an expert.
